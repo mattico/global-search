@@ -135,7 +135,10 @@ fn query(req: HttpRequest<AppState>) -> Box<Future<Item = HttpResponse, Error = 
             .send(SearchQuery { query })
             .from_err()
             .and_then(|res| match res {
-                Ok(resp) => Ok(HttpResponse::Ok().json(resp).into()),
+                Ok(resp) => Ok(HttpResponse::Ok()
+                    .content_type("application/json")
+                    .body(resp)
+                    .into()),
                 Err(_) => Ok(HttpResponse::InternalServerError()
                     .reason("Error executing search query")
                     .finish()
