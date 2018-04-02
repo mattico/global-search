@@ -12,7 +12,7 @@ extern crate serde;
 extern crate serde_json;
 #[macro_use]
 extern crate tantivy;
-extern crate tempdir;
+extern crate tempfile;
 
 use std::sync::Arc;
 
@@ -28,7 +28,7 @@ use std::path::Path;
 use tantivy::collector::TopCollector;
 use tantivy::query::{Query, QueryParser};
 use tantivy::schema::*;
-use tempdir::TempDir;
+use tempfile::Builder as TempFileBuilder;
 
 fn run() -> Result<()> {
     env_logger::Builder::from_env("SEARCH_LOG")
@@ -42,7 +42,7 @@ fn run() -> Result<()> {
     let breadcrumbs = schema_builder.add_text_field("breadcrumbs", TEXT | STORED);
     let body = schema_builder.add_text_field("body", TEXT | STORED);
     let schema = schema_builder.build();
-    let tmp_dir = TempDir::new("bookshelf_index")?;
+    let tmp_dir = TempFileBuilder::new().prefix("bookshelf-search").tempdir()?;
     let search_index = tantivy::Index::create(tmp_dir.path(), schema.clone())?;
     let mut index_writer = search_index.writer(100_000_000)?;
 
